@@ -15,9 +15,7 @@ type Props = {
 };
 
 function readSavedWorkflows() {
-  return JSON.parse(
-    localStorage.getItem("flowforge-saved-workflows") || "[]"
-  );
+  return JSON.parse(localStorage.getItem("flowforge-saved-workflows") || "[]");
 }
 
 export default function SavedWorkflows({ onLoad }: Props) {
@@ -30,27 +28,16 @@ export default function SavedWorkflows({ onLoad }: Props) {
 
     refresh();
 
-    window.addEventListener(
-      "flowforge-saved-workflows-updated",
-      refresh
-    );
-
+    window.addEventListener("flowforge-saved-workflows-updated", refresh);
     window.addEventListener("storage", refresh);
 
     return () => {
-      window.removeEventListener(
-        "flowforge-saved-workflows-updated",
-        refresh
-      );
-
+      window.removeEventListener("flowforge-saved-workflows-updated", refresh);
       window.removeEventListener("storage", refresh);
     };
   }, []);
 
-  const deleteWorkflow = (
-    e: React.MouseEvent,
-    index: number
-  ) => {
+  const deleteWorkflow = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
 
     const updated = items.filter((_, i) => i !== index);
@@ -61,6 +48,7 @@ export default function SavedWorkflows({ onLoad }: Props) {
     );
 
     setItems(updated);
+    window.dispatchEvent(new Event("flowforge-saved-workflows-updated"));
   };
 
   return (
@@ -68,7 +56,6 @@ export default function SavedWorkflows({ onLoad }: Props) {
       <h2 className="text-2xl font-semibold text-slate-900">
         Saved Workflows
       </h2>
-
       <p className="mt-2 text-slate-600">
         Click a workflow to load it back into FlowForge.
       </p>
@@ -80,34 +67,30 @@ export default function SavedWorkflows({ onLoad }: Props) {
           </div>
         ) : (
           items.map((item, index) => (
-            <button
+            <div
               key={item.savedAt + index}
               onClick={() => onLoad(item.prompt)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-cyan-300 hover:bg-cyan-50"
+              className="w-full cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-cyan-300 hover:bg-cyan-50"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-slate-900">
-                    {item.name ||
-                      item.title ||
-                      "Untitled Workflow"}
+                    {item.name || item.title || "Untitled Workflow"}
                   </p>
-
                   <p className="mt-1 text-sm text-slate-600">
                     {item.steps.length} steps
                   </p>
                 </div>
 
                 <button
-                  onClick={(e) =>
-                    deleteWorkflow(e, index)
-                  }
+                  type="button"
+                  onClick={(e) => deleteWorkflow(e, index)}
                   className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100"
                 >
                   🗑️ Delete
                 </button>
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>
